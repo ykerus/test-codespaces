@@ -1,15 +1,22 @@
 FROM mcr.microsoft.com/devcontainers/python:3.12
 
-# Install additional dependencies for the gcloud CLI
-RUN apt-get update && apt-get install -y \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+# Install additional OS packages if needed (unzip, etc)
+RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists/*
 
-# Download and install the Google Cloud CLI
-RUN curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-linux-x86_64.tar.gz \
-    && tar -xf google-cloud-cli-linux-x86_64.tar.gz \
-    && ./google-cloud-sdk/install.sh --quiet \
-    && rm google-cloud-cli-linux-x86_64.tar.gz
+# Download the Google Cloud SDK
+RUN curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-linux-x86_64.tar.gz
 
-# Add the gcloud CLI to the PATH
-ENV PATH $PATH:/google-cloud-sdk/bin
+# Extract the Google Cloud SDK
+RUN tar -xf google-cloud-cli-linux-x86_64.tar.gz && rm google-cloud-cli-linux-x86_64.tar.gz
+
+# Run the install script
+RUN ./google-cloud-sdk/install.sh --quiet
+
+# Add gcloud to the PATH
+ENV PATH="/google-cloud-sdk/bin:${PATH}"
+
+# Clean up
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
+
+
