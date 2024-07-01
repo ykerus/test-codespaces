@@ -1,7 +1,15 @@
 FROM mcr.microsoft.com/devcontainers/python:3.12
 
-# RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" \
-#     | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list \
-#     && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
-#     sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add - \
-#     && sudo apt-get update && sudo apt-get install google-cloud-cli
+# Install additional dependencies for the gcloud CLI
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Download and install the Google Cloud CLI
+RUN curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-linux-x86_64.tar.gz \
+    && tar -xf google-cloud-cli-linux-x86_64.tar.gz \
+    && ./google-cloud-sdk/install.sh --quiet \
+    && rm google-cloud-cli-linux-x86_64.tar.gz
+
+# Add the gcloud CLI to the PATH
+ENV PATH $PATH:/google-cloud-sdk/bin
